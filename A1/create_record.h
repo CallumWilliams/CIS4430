@@ -1,49 +1,78 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
 
-//search method - assume lastname + firstname concatenated (e.x. MASONALAN)
+#define DATA_FILE "data.txt"
+#define RECORD_SIZE 50
+#define RECORD_COUNT 4
 
-typedef struct rec {
+typedef struct RECORD {
 	
-	char last_name[5];
-	char first_name[5];
-	char street_address[10];
-	char city_name[4];
-	char province[2];
-	char postal_code[6];
+	char last_name[8];
+	char first_name[8];
+	char st_addr[10];
+	char city[10];
+	char prov[2];
+	char post[6];
 	
-}Record;
+}record;
 
-Record *createRecord(char l[5], char f[5], char s[10], char c[4], char p[2], char po[6]) {
+record *createRecord(char l[8], char f[8], char s[10], char c[10], char pr[2], char po[6]) {
 	
-	Record *r = malloc(sizeof(Record));
+	record *r = malloc(sizeof(record));
 	strcpy(r->last_name, l);
 	strcpy(r->first_name, f);
-	strcpy(r->street_address, s);
-	strcpy(r->city_name, c);
-	strcpy(r->province, p);
-	strcpy(r->postal_code, po);
-	
+	strcpy(r->st_addr, s);
+	strcpy(r->city, c);
+	strcpy(r->prov, pr);
+	strcpy(r->post, po);
 	return r;
 	
 }
 
-char *buildRecordString(Record *r) {
+char *buildRecordString(record *r) {
 	
-	//temp
-	char *ret = "\0";
-	return ret;
+	char *ret;
+	ret = malloc(sizeof(char)*RECORD_SIZE);
+	strcpy(ret, r->last_name);
+	strcat(ret, "|");
+	strcat(ret, r->first_name);
+	strcat(ret, "|");
+	strcat(ret, r->st_addr);
+	strcat(ret, "|");
+	strcat(ret, r->city);
+	strcat(ret, "|");
+	strcat(ret, r->prov);
+	strcat(ret, "|");
+	strcat(ret, r->post);
+	strcat(ret, "|");
+	return  ret;
 	
 }
 
-int addRecordToData(Record *r) {
+void addRecordToFile(char *file, record **r) {
 	
-	int file = 0;
+	int fd;
+	int bytes, size;
+	char *input;
+	FILE *fp;
 	
-	//file = open("data.txt", O_CREAT | O_WRONLY, 0751);
-	//char input = 
-	
-	return 0;
+	fp = fopen(file, "w");
+	fclose(fp);
+	fp = fopen(file, "a");
+	for (int i = 0; i < RECORD_COUNT; i++) {
+		fputs(buildRecordString(r[i]), fp);
+	}
+	fclose(fp);
+	//fd = open(DATA_FILE, O_WRONLY | O_CREAT, 0751);
+	//input = buildRecordString(r);
+	//size = strlen(input)+1;
+	//bytes = write(fd, input, size);
+	//if (bytes != size) {
+		//printf("Write error\n");
+		//exit(1);
+	//}
 	
 }
