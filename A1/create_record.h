@@ -5,8 +5,10 @@
 #include <unistd.h>
 
 #define DATA_FILE "data.txt"
+#define INDEX_FILE "index.txt"
 #define RECORD_SIZE 67
-#define RECORD_COUNT 4
+#define RECORD_COUNT 7
+int HEADER_SIZE;
 
 typedef struct RECORD {
 	
@@ -37,7 +39,9 @@ char *buildHeaderString() {
 	char *ret;
 	
 	ret = malloc(sizeof(char)*15);
-	sprintf(ret, "index.txt|%d|%d|", RECORD_SIZE, RECORD_COUNT);
+	sprintf(ret, "%s|%d|%d|", INDEX_FILE, RECORD_SIZE, RECORD_COUNT);
+	HEADER_SIZE = strlen(ret)+1;
+	sprintf(ret, "%d|%s|%d|%d|", HEADER_SIZE+2, INDEX_FILE, RECORD_SIZE, RECORD_COUNT);
 	
 	return ret;
 	
@@ -63,20 +67,36 @@ char *buildRecordString(record *r) {
 	
 }
 
-void addRecordToFile(char *file, record **r) {
+char *convertIndexToString(int i) {
 	
-	int fd;
-	int bytes, size;
-	char *input;
-	FILE *fp;
+	char *ret;
+	sprintf(ret, "%d ", i);
 	
-	fp = fopen(file, "w");
-	fclose(fp);
-	fp = fopen(file, "a");
-	fputs(buildHeaderString(), fp);
+	return ret;
+	
+}
+
+void addRecordToFile(record **r) {
+	
+	FILE *fp1;
+	FILE *fp2;
+	int index;
+	
+	fp1 = fopen(DATA_FILE, "w");
+	fclose(fp1);
+	fp2 = fopen(INDEX_FILE, "w");
+	fclose(fp2);
+	
+	index = 0;
+	fp1 = fopen(DATA_FILE, "a");
+	fp2 = fopen(INDEX_FILE, "a");
+	fputs(buildHeaderString(), fp1);
 	for (int i = 0; i < RECORD_COUNT; i++) {
-		fputs(buildRecordString(r[i]), fp);
+		fputs(buildRecordString(r[i]), fp1);
+		fputs(convertIndexToString(index), fp2);
+		index += RECORD_SIZE;
 	}
-	fclose(fp);
+	fclose(fp1);
+	fclose(fp2);
 	
 }
