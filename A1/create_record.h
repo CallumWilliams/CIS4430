@@ -5,21 +5,21 @@
 #include <unistd.h>
 
 #define DATA_FILE "data.txt"
-#define RECORD_SIZE 50
+#define RECORD_SIZE 67
 #define RECORD_COUNT 4
 
 typedef struct RECORD {
 	
-	char last_name[8];
-	char first_name[8];
-	char st_addr[10];
-	char city[10];
+	char last_name[10];
+	char first_name[10];
+	char st_addr[15];
+	char city[15];
 	char prov[2];
-	char post[6];
+	char post[9];
 	
 }record;
 
-record *createRecord(char l[8], char f[8], char s[10], char c[10], char pr[2], char po[6]) {
+record *createRecord(char l[10], char f[10], char s[15], char c[15], char pr[2], char po[9]) {
 	
 	record *r = malloc(sizeof(record));
 	strcpy(r->last_name, l);
@@ -29,6 +29,17 @@ record *createRecord(char l[8], char f[8], char s[10], char c[10], char pr[2], c
 	strcpy(r->prov, pr);
 	strcpy(r->post, po);
 	return r;
+	
+}
+
+char *buildHeaderString() {
+	
+	char *ret;
+	
+	ret = malloc(sizeof(char)*15);
+	sprintf(ret, "index.txt|%d|%d|", RECORD_SIZE, RECORD_COUNT);
+	
+	return ret;
 	
 }
 
@@ -62,17 +73,10 @@ void addRecordToFile(char *file, record **r) {
 	fp = fopen(file, "w");
 	fclose(fp);
 	fp = fopen(file, "a");
+	fputs(buildHeaderString(), fp);
 	for (int i = 0; i < RECORD_COUNT; i++) {
 		fputs(buildRecordString(r[i]), fp);
 	}
 	fclose(fp);
-	//fd = open(DATA_FILE, O_WRONLY | O_CREAT, 0751);
-	//input = buildRecordString(r);
-	//size = strlen(input)+1;
-	//bytes = write(fd, input, size);
-	//if (bytes != size) {
-		//printf("Write error\n");
-		//exit(1);
-	//}
 	
 }
