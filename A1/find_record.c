@@ -6,14 +6,11 @@
 int main(int argc, char *argv[]) {
 	
 	int fd;
-	int fd_;
 	long pos;
 	char query[20];
 	
 	char *header_size_str;
-	char *index_cont_str;
-	
-	int *index_array;
+	char *rec;
 	
 	if (argc < 2) {
 		printf("Please run as \"./find_record <INPUT_FILE>\"\n");
@@ -34,23 +31,18 @@ int main(int argc, char *argv[]) {
 	read(fd, header_size_str, HEADER_SIZE-2);
 	loadHeaderData(header_size_str);
 	free(header_size_str);
-	index_array = malloc(sizeof(int)*RECORD_COUNT);
-	fd_ = open("index.txt", O_RDONLY);
-	pos = lseek(fd_, 0, SEEK_END);
-	lseek(fd_, 0, 0);
-	index_cont_str = malloc(sizeof(char)*pos);
-	read(fd_, index_cont_str, pos);
-	index_array = loadIndexData(index_cont_str);
+	close(fd);
 	
 	printf("Search records via \"<LASTNAME><FIRSTNAME>\"\n");
 	printf("Type \"exit\" to terminate\n\n");
+	rec = malloc(sizeof(char)*RECORD_SIZE);
 	do {
 		
 		printf("Search record > ");
 		scanf("%s", query);
 		
 		if (strcmp(query, "exit") == 0) break;
-		
+		rec = searchRecords(argv[1], query);
 		
 		
 	} while(1);

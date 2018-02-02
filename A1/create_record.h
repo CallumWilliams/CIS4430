@@ -94,7 +94,7 @@ void addRecordToFile(record **r) {
 	for (int i = 0; i < RECORD_COUNT; i++) {
 		fputs(buildRecordString(r[i]), fp1);
 		fputs(convertIndexToString(index), fp2);
-		index += RECORD_SIZE;
+		index += strlen(buildRecordString(r[i]));
 	}
 	fclose(fp1);
 	fclose(fp2);
