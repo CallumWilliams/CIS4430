@@ -7,7 +7,7 @@
 #define DATA_FILE "data.txt"
 #define INDEX_FILE "index.txt"
 #define RECORD_SIZE 67
-#define RECORD_COUNT 7
+#define RECORD_COUNT 8
 int HEADER_SIZE;
 
 typedef struct RECORD {

@@ -62,13 +62,16 @@ char *searchRecords(char *dataRecords, char *toSearch) {
 	
 	int fd;
 	int pos;
+	int cmp;
 	char *index_cont_str;
 	int *index;
 	
 	int mid;
+	int records_left;
 	char *key;
 	char *token;
 	char *ret;
+	char tmp[100];
 	
 	//build index locations
 	fd = open("index.txt", O_RDONLY);
@@ -79,18 +82,41 @@ char *searchRecords(char *dataRecords, char *toSearch) {
 	index = loadIndexData(index_cont_str);
 	close(fd);
 	
+	records_left = RECORD_COUNT;
 	mid = floor(RECORD_COUNT/2);
-	pos = index[mid];
 	
-	ret = malloc(sizeof(char)*RECORD_SIZE);
-	fd = open("data.txt", O_RDONLY);
-	lseek(fd, HEADER_SIZE + pos, SEEK_SET);
-	read(fd, ret, RECORD_SIZE);
+	do {
+		
+		pos = index[mid];
+		
+		ret = malloc(sizeof(char)*RECORD_SIZE);
+		fd = open("data.txt", O_RDONLY);
+		lseek(fd, HEADER_SIZE + pos, SEEK_SET);
+		read(fd, ret, RECORD_SIZE);
+		
+		key = malloc(sizeof(char)*20);
+		key = buildKey(ret);
+		
+		cmp = strcmp(key, toSearch);
+		printf("%s vs %s\n", key, toSearch);
+		
+		if (cmp == 0) {//found it
+			printf("Record found\n");
+			return ret;
+		} else if (cmp < 0) {//go to the right
+			records_left = floor(records_left/2);
+			mid = mid + records_left;
+			printf("Going right - new mid: %d, records left: %d\n", mid, records_left);
+		} else {//go to the left
+			records_left = floor(records_left/2);
+			mid = mid - records_left;
+			printf("Going left - new mid: %d, records left: %d\n", mid, records_left);
+		}
+		//scanf("%s", tmp);
+		
+	} while (records_left != 0);
 	
-	key = malloc(sizeof(char)*20);
-	key = buildKey(ret);
-	printf("%s\n", key);
-	
-	return ret;
+	printf("Entry not found\n");
+	return NULL;
 	
 }
