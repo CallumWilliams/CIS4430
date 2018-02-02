@@ -71,7 +71,7 @@ char *searchRecords(char *dataRecords, char *toSearch) {
 	char *key;
 	char *token;
 	char *ret;
-	char tmp[100];
+	char *tmp;
 	
 	//build index locations
 	fd = open("index.txt", O_RDONLY);
@@ -82,23 +82,23 @@ char *searchRecords(char *dataRecords, char *toSearch) {
 	index = loadIndexData(index_cont_str);
 	close(fd);
 	
-	records_left = RECORD_COUNT;
+	records_left = RECORD_COUNT/2;
 	mid = floor(RECORD_COUNT/2);
+	key = malloc(sizeof(char)*20);
+	ret = malloc(sizeof(char)*RECORD_SIZE);
+	tmp = malloc(sizeof(char)*RECORD_SIZE);
+	fd = open("data.txt", O_RDONLY);
 	
 	do {
 		
 		pos = index[mid];
 		
-		ret = malloc(sizeof(char)*RECORD_SIZE);
-		fd = open("data.txt", O_RDONLY);
 		lseek(fd, HEADER_SIZE + pos, SEEK_SET);
 		read(fd, ret, RECORD_SIZE);
-		
-		key = malloc(sizeof(char)*20);
-		key = buildKey(ret);
+		strcpy(tmp, ret); //makes it so the pointer doesn't get moved
+		key = buildKey(tmp);
 		
 		cmp = strcmp(key, toSearch);
-		printf("%s vs %s\n", key, toSearch);
 		
 		if (cmp == 0) {//found it
 			printf("Record found\n");
@@ -106,17 +106,39 @@ char *searchRecords(char *dataRecords, char *toSearch) {
 		} else if (cmp < 0) {//go to the right
 			records_left = floor(records_left/2);
 			mid = mid + records_left;
-			printf("Going right - new mid: %d, records left: %d\n", mid, records_left);
 		} else {//go to the left
 			records_left = floor(records_left/2);
 			mid = mid - records_left;
-			printf("Going left - new mid: %d, records left: %d\n", mid, records_left);
+			printf("%d %d\n", mid, records_left);
 		}
-		//scanf("%s", tmp);
 		
-	} while (records_left != 0);
+	} while (records_left >= 0);
 	
 	printf("Entry not found\n");
 	return NULL;
+	
+}
+
+void printRecord(char *ret) {
+	
+	char *token;
+	
+	token = strtok(ret, "|");
+	printf("\tLast Name: %s\n", token);
+	
+	token = strtok(NULL, "|");
+	printf("\tFirst Name: %s\n", token);
+	
+	token = strtok(NULL, "|");
+	printf("\tAddress: %s\n", token);
+	
+	token = strtok(NULL, "|");
+	printf("\tCity: %s\n", token);
+	
+	token = strtok(NULL, "|");
+	printf("\tProvince: %s\n", token);
+	
+	token = strtok(NULL, "|");
+	printf("\tPostal Code: %s\n", token);
 	
 }

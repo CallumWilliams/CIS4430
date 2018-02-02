@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 		
 		if (strcmp(query, "exit") == 0) break;
 		rec = searchRecords(argv[1], query);
-		
+		if (rec) printRecord(rec);
 		
 	} while(1);
 	
