@@ -8,6 +8,10 @@ int main() {
 	
 	char input[10];
 	int opt = 0;
+	char *s = malloc(sizeof(char) * 20);
+	strcpy(s, "test");
+	initialSetup();
+	collectRecordAtIndex(s, 0);
 	
 	printf("Please enter the number of what option you would like:\n");
 	do {
