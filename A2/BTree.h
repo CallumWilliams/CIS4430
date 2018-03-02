@@ -103,6 +103,16 @@ void initialSetup() {
 	
 }
 
+/**Standard output for printing a record**/
+void printRecord(Record r) {
+	
+	printf("\tWord: %s\n", r.word);
+	printf("\tPronounciation: %s\n", r.pronounciation);
+	printf("\tStress: %s\n", r.stress);
+	printf("\tForeign Index: %d\n", r.foreign);
+	
+}
+
 /**Initializes a minimal page with record r**/
 Page initializePage(Record r) {
 	
@@ -288,14 +298,23 @@ void buildIndexFileHeader(int headInd, int keyCount) {
 	
 }
 
-
-
-/**asks user for input and creates and stores record**/
-int insertRecord(char *word, char *pron, char *stre, int fore) {
+/**searches for a record**/
+int searchRecord(int RRN, char *key) {
 	
-	//Record r = initializeRecord(word, pron, stre, fore);
+	Page p = readPageAt(RRN);
 	
-	//search tree
+	for (int i = 0; i < p.keyCount; i++) {
+		
+		printf("|%s| vs |%s|\n", p.key[i].word, key);
+		if (strcmp(p.key[i].word, key) == 0) {
+			printf("Found key %s\n", key);
+			printRecord(p.key[i]);
+			return 1;
+		}
+		
+	}
+	
+	return 0;
 	
 }
 
@@ -307,16 +326,6 @@ void displayOptions() {
 	printf("3) Display current B-Tree\n");
 	printf("4) Exit\n");
 	printf(">");
-	
-}
-
-/**Standard output for printing a record**/
-void printRecord(Record r) {
-	
-	printf("\tWord: %s\n", r.word);
-	printf("\tPronounciation: %s\n", r.pronounciation);
-	printf("\tStress: %s\n", r.stress);
-	printf("\tForeign Index: %d\n", r.foreign);
 	
 }
 

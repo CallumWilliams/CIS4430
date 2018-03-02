@@ -6,16 +6,15 @@
 
 int main() {
 	
-	char input[10];
+	char input[20];
 	int opt = 0;
 	initialSetup();
-	//readPageAt(0);
 	
 	printf("Please enter the number of what option you would like:\n");
 	do {
 		
 		displayOptions();
-		fgets(input, 10, stdin);
+		fgets(input, 20, stdin);
 		if (isdigit(input[0])) {
 			
 			opt = atoi(&input[0]);
@@ -26,7 +25,10 @@ int main() {
 					printf("Insert not yet supported\n");
 					break;
 				case 2:
-					printf("Search not yet supported\n");
+					printf("Enter the key you want to search for >");
+					fgets(input, 20, stdin);
+					input[strlen(input)-1] = '\0';//removes \n
+					searchRecord(HEAD_PAGE_INDEX, input);
 					break;
 				case 3:
 					printTree(HEAD_PAGE_INDEX);
