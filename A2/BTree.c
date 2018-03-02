@@ -34,6 +34,9 @@ int main() {
 					printTree(HEAD_PAGE_INDEX);
 					break;
 				case 4:
+					printHeaders();
+					break;
+				case 5:
 					printf("Exiting program\n");
 					break;
 				default:

@@ -5,7 +5,7 @@
 #include <fcntl.h>
 #include <string.h>
 
-#define EXIT 4
+#define EXIT 5
 #define ORDER 4
 
 typedef struct _record {
@@ -100,6 +100,28 @@ void initialSetup() {
 	TOTAL_PAGES = atoi(tmp);
 	
 	fclose(f2);
+	
+}
+
+/**prints header information**/
+void printHeaders() {
+	
+	int fd, pos;
+	char tok[30];
+	
+	fd = open("data.txt", O_RDONLY);
+	lseek(fd, 0, 0);
+	read(fd, tok, DATA_FILE_HEADER_LENGTH);
+	printf("Data file: %s\n", tok);
+	close(fd);
+	
+	memset(tok, '\0', 30);
+	
+	fd = open("index.txt", O_RDONLY);
+	lseek(fd, 0, 0);
+	read(fd, tok, INDEX_FILE_HEADER_LENGTH);
+	printf("Index file: %s\n", tok);
+	close(fd);
 	
 }
 
@@ -324,7 +346,8 @@ void displayOptions() {
 	printf("\n1) Insert a record\n");
 	printf("2) Search for a record\n");
 	printf("3) Display current B-Tree\n");
-	printf("4) Exit\n");
+	printf("4) Display header information\n");
+	printf("5) Exit\n");
 	printf(">");
 	
 }
