@@ -7,7 +7,6 @@
 
 #define EXIT 4
 #define ORDER 4
-#define PAGE_SIZE 512
 
 typedef struct _record {
 	
@@ -29,6 +28,7 @@ typedef struct _page {
 
 int DATA_FILE_HEADER_LENGTH;
 int INDEX_FILE_HEADER_LENGTH;
+int PAGE_SIZE;
 int HEAD_PAGE_INDEX;
 int TOTAL_PAGES;
 
@@ -39,7 +39,8 @@ void initialSetup() {
 	//trivial algorithm for getting header lengths
 	
 	FILE *f1, *f2;
-	int c;
+	int c, i;
+	char tmp[10];
 	
 	//DATA_FILE_HEADER_LENGTH
 	f1 = fopen("data.txt", "r");
@@ -63,20 +64,42 @@ void initialSetup() {
 		c = fgetc(f2);
 	}
 	fclose(f2);
+	//get PAGE_SIZE, HEAD_PAGE_INDEX and TOTAL_PAGES
+	f2 = fopen("index.txt", "r");
+	//get PAGE_SIZE
+	c = fgetc(f2);
+	memset(tmp, '\0', 10);
+	i = 0;
+	while (c != 32 && c != -1) {
+		tmp[i] = c;
+		i++;
+		c = fgetc(f2);
+	}
+	PAGE_SIZE = atoi(tmp);
 	
-}
-
-/**Initializes a record**/
-Record initializeRecord(char *w, char *p, char *s, int f) {
+	//get HEAD_PAGE_INDEX
+	c = fgetc(f2);
+	memset(tmp, '\0', 10);
+	i = 0;
+	while (c != 32 && c != -1) {
+		tmp[i] = c;
+		i++;
+		c = fgetc(f2);
+	}
+	HEAD_PAGE_INDEX = atoi(tmp);
 	
-	Record r;
+	//get TOTAL_PAGES
+	c = fgetc(f2);
+	memset(tmp, '\0', 10);
+	i = 0;
+	while (c != 124 && c != -1) {
+		tmp[i] = c;
+		i++;
+		c = fgetc(f2);
+	}
+	TOTAL_PAGES = atoi(tmp);
 	
-	strcpy(r.word, w);
-	strcpy(r.pronounciation, p);
-	strcpy(r.stress, s);
-	r.foreign = f;
-	
-	return r;
+	fclose(f2);
 	
 }
 
@@ -124,11 +147,10 @@ Record collectRecordAtIndex(char *key, int index) {
 	recLen = atoi(recSize);
 	input = malloc(sizeof(char) * recLen);
 	
-	printf("len %s\n", recSize);
 	//fetch input string
 	read(fd, input, recLen);
 	strcat(input, "\0");
-	printf("input %s\n", input);
+	
 	//parse out arguments
 	tok = strtok(input, "|");
 	r.word = malloc(sizeof(char) * strlen(tok));
@@ -141,12 +163,12 @@ Record collectRecordAtIndex(char *key, int index) {
 	strcpy(r.stress, tok);
 	tok = strtok(NULL, "|");
 	r.foreign = atoi(tok);
-	printf("%s %s %s %d\n", r.word, r.pronounciation, r.stress, r.foreign);
 	
 	return r;
 	
 }
 
+/**goes to RRN on index.txt and reads page**/
 Page readPageAt(int RRN) {
 	
 	Page ret;
@@ -179,7 +201,6 @@ Page readPageAt(int RRN) {
 	strcpy(children, tok);
 	
 	//read out keys
-	printf("%s\n", keys);
 	int indexTrack = 0;
 	for (int i = 0; i < ret.keyCount; i++) {
 		
@@ -200,36 +221,32 @@ Page readPageAt(int RRN) {
 		
 		memset(ind, '\0', 50);
 		memset(key, '\0', 50);
-		printf("token %s\n", arg);
 		
 		//parse out key
 		for (j = 0; arg[j] != ' '; j++) {
 			key[j] = arg[j];
 		}
 		
-		printf("key %s\n", key);
 		k = 0;
 		//parse out index
 		for (j = j + 1; j < strlen(arg) + 1; j++) {
 			ind[k] = arg[j];
 			k++;
 		}
-		printf("ind %s\n", ind);
 		
 		//fetch record from data file
 		ret.key[i] = collectRecordAtIndex(key, atoi(ind));
-		printf("success %d\n", i);
 		indexTrack++;
 		
 	}
 	
-	//tok = strtok(children, ",");
-	/*for (int i = 0; i < ret.keyCount + 1; i++) {
+	tok = strtok(children, ",");
+	for (int i = 0; i < ret.keyCount + 1; i++) {
 		
-		printf("%s\n", tok);
+		ret.child[i] = atoi(tok);
 		tok = strtok(NULL, ",");
 		
-	}*/
+	}
 	
 	return ret;
 	
@@ -276,7 +293,7 @@ void buildIndexFileHeader(int headInd, int keyCount) {
 /**asks user for input and creates and stores record**/
 int insertRecord(char *word, char *pron, char *stre, int fore) {
 	
-	Record r = initializeRecord(word, pron, stre, fore);
+	//Record r = initializeRecord(word, pron, stre, fore);
 	
 	//search tree
 	
@@ -293,36 +310,52 @@ void displayOptions() {
 	
 }
 
-Record buildRecordFromString(char *s) {
+/**Standard output for printing a record**/
+void printRecord(Record r) {
 	
-	Record ret;
-	
-	return ret;
+	printf("\tWord: %s\n", r.word);
+	printf("\tPronounciation: %s\n", r.pronounciation);
+	printf("\tStress: %s\n", r.stress);
+	printf("\tForeign Index: %d\n", r.foreign);
 	
 }
 
-Page loadPageFromString(char *s) {
+/**Standard output for printing a page**/
+void printPage(Page p) {
 	
-	Page ret;
-	char *tok;
-	char *subParse;
-	int i;
-	
-	tok = strtok(s, "|");
-	ret.keyCount = atoi(tok);
-	tok = strtok(NULL, "|");
-	
-	subParse = strtok(tok, ",");
-	i = 0;
-	do {
+	printf("Page Index: %d\n", p.keyCount);
+	//print records
+	for (int i = 0; i < p.keyCount; i++) {
 		
+		printRecord(p.key[i]);
 		
-		i++;
-		
-	} while (subParse = strtok(NULL, ","));
-	tok = strtok(NULL, "|");
-	printf("%s\n", tok);
+	}
 	
-	return ret;
+	//print children (if there)
+	for (int i = 0; i < p.keyCount + 1; i++) {
+		
+		if (p.child[i] != -1) {
+			printf("Child: %d\n", p.child[i]);
+		}
+		
+	}
+	
+}
+
+/**Parses through tree to print elements**/
+void printTree(int RRN) {
+	
+	Page p = readPageAt(RRN);
+	
+	printPage(p);
+	
+	for (int i = 0; i < p.keyCount + 1; i++) {
+		
+		if (p.child[i] != -1) {
+			p = readPageAt(p.child[i]);
+			printPage(p);
+		}
+		
+	}
 	
 }

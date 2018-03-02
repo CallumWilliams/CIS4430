@@ -9,7 +9,7 @@ int main() {
 	char input[10];
 	int opt = 0;
 	initialSetup();
-	readPageAt(0);
+	//readPageAt(0);
 	
 	printf("Please enter the number of what option you would like:\n");
 	do {
@@ -29,7 +29,7 @@ int main() {
 					printf("Search not yet supported\n");
 					break;
 				case 3:
-					printf("Display not yet supported\n");
+					printTree(HEAD_PAGE_INDEX);
 					break;
 				case 4:
 					printf("Exiting program\n");
