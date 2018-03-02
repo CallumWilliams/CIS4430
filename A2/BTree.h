@@ -22,8 +22,8 @@ typedef struct _page {
 	
 	int keyCount;
 	Record key[ORDER - 1];
+	int keyIndex[ORDER - 1];
 	int child[ORDER];
-	int childIndex[ORDER];
 	
 }Page;
 
@@ -122,14 +122,13 @@ Record collectRecordAtIndex(char *key, int index) {
 	}
 	//convert
 	recLen = atoi(recSize);
-	printf("%d\n", recLen);
 	input = malloc(sizeof(char) * recLen);
 	
+	printf("len %s\n", recSize);
 	//fetch input string
 	read(fd, input, recLen);
 	strcat(input, "\0");
-	printf("%s\n", input);
-	
+	printf("input %s\n", input);
 	//parse out arguments
 	tok = strtok(input, "|");
 	r.word = malloc(sizeof(char) * strlen(tok));
@@ -142,6 +141,7 @@ Record collectRecordAtIndex(char *key, int index) {
 	strcpy(r.stress, tok);
 	tok = strtok(NULL, "|");
 	r.foreign = atoi(tok);
+	printf("%s %s %s %d\n", r.word, r.pronounciation, r.stress, r.foreign);
 	
 	return r;
 	
@@ -150,35 +150,86 @@ Record collectRecordAtIndex(char *key, int index) {
 Page readPageAt(int RRN) {
 	
 	Page ret;
-	char *buff;
+	char buff[512];
 	char *tok;
-	char *subTok;
+	char *keys, *children;
 	int i = 0;
-	int fd, pos;
+	int fd, pos, b;
+	
+	memset(buff, '\0', 512);
 	fd = open("index.txt", O_RDONLY);
+	
 	//collect string
-	pos = lseek(fd, INDEX_FILE_HEADER_LENGTH + (PAGE_SIZE * 512), 0);
-	read(fd, buff, 512);
+	pos = lseek(fd, INDEX_FILE_HEADER_LENGTH + (RRN * 512) + 1, 0);
+	b = read(fd, buff, 512);
 	close(fd);
 	
 	//parse out page
-	printf("%s\n", buff);
 	tok = strtok(buff, "|");
 	ret.keyCount = atoi(tok);
-	tok = strtok(NULL, "|");
-	subTok = strtok(tok, ",");
-	do {
-		
-		char *t;
-		char *key;
-		t = strtok(subTok, " ");
-		strcpy(key, t);
-		t = strtok(NULL, " ");
-		ret.key[i] = collectRecordAtIndex(key, atoi(t));
-		i++;
-		
-	} while (subTok = strtok(NULL, ","));
 	
+	//read keys
+	tok = strtok(NULL, "|");
+	keys = malloc(sizeof(char) * strlen(tok));
+	strcpy(keys, tok);
+	
+	//read children
+	tok = strtok(NULL, "|");
+	children = malloc(sizeof(char) * strlen(tok));
+	strcpy(children, tok);
+	
+	//read out keys
+	printf("%s\n", keys);
+	int indexTrack = 0;
+	for (int i = 0; i < ret.keyCount; i++) {
+		
+		//replacement strtok (need to keep track of place)
+		int j, k;
+		char arg[50];
+		char ind[50];
+		char key[50];
+		
+		memset(arg, '\0', 50);
+		
+		k = 0;
+		//parse out full key
+		for (indexTrack; keys[indexTrack] != ','; indexTrack++) {
+			arg[k] = keys[indexTrack];
+			k++;
+		}
+		
+		memset(ind, '\0', 50);
+		memset(key, '\0', 50);
+		printf("token %s\n", arg);
+		
+		//parse out key
+		for (j = 0; arg[j] != ' '; j++) {
+			key[j] = arg[j];
+		}
+		
+		printf("key %s\n", key);
+		k = 0;
+		//parse out index
+		for (j = j + 1; j < strlen(arg) + 1; j++) {
+			ind[k] = arg[j];
+			k++;
+		}
+		printf("ind %s\n", ind);
+		
+		//fetch record from data file
+		ret.key[i] = collectRecordAtIndex(key, atoi(ind));
+		printf("success %d\n", i);
+		indexTrack++;
+		
+	}
+	
+	//tok = strtok(children, ",");
+	/*for (int i = 0; i < ret.keyCount + 1; i++) {
+		
+		printf("%s\n", tok);
+		tok = strtok(NULL, ",");
+		
+	}*/
 	
 	return ret;
 	
