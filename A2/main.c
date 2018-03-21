@@ -11,10 +11,6 @@ int main() {
 	char input[20];
 	int opt = 0;
 	initialSetup();
-	Page p = readPageAt(0);
-	char *ret = buildDataRecordString(p);
-	writeDataToIndexFile(0, ret);
-	printf("%s\n", ret);
 	
 	printf("Please enter the number of what option you would like:\n");
 	do {

@@ -101,16 +101,6 @@ void printHeaders() {
 	
 }
 
-/**Standard output for printing a record**/
-void printRecord(Record r) {
-	
-	printf("\tWord: %s\n", r.word);
-	printf("\tPronounciation: %s\n", r.pronounciation);
-	printf("\tStress: %s\n", r.stress);
-	printf("\tForeign Index: %d\n", r.foreign);
-	
-}
-
 /**Initializes a minimal page with record r**/
 Page initializePage(Record r) {
 	
@@ -356,16 +346,7 @@ SearchResults searchRecord(int RRN, char *key) {
 	
 	Page p = readPageAt(RRN);
 	
-	for (int i = 0; i < p.keyCount; i++) {
-		
-		printf("|%s| vs |%s|\n", p.key[i].word, key);
-		if (strcmp(p.key[i].word, key) == 0) {
-			printf("Found key %s\n", key);
-			printRecord(p.key[i]);
-			return EXISTS;
-		}
-		
-	}
+	//find where the key should occur
 	
 	return NOT_EXISTS;
 	
@@ -383,10 +364,20 @@ void displayOptions() {
 	
 }
 
+/**Standard output for printing a record**/
+void printRecord(Record r) {
+	
+	printf("\tWord: %s\n", r.word);
+	printf("\tPronounciation: %s\n", r.pronounciation);
+	printf("\tStress: %s\n", r.stress);
+	printf("\tForeign Index: %d\n", r.foreign);
+	
+}
+
 /**Standard output for printing a page**/
 void printPage(Page p) {
 	
-	printf("Page Index: %d\n", p.keyCount);
+	printf("-------------------------------\n");
 	//print records
 	for (int i = 0; i < p.keyCount; i++) {
 		
@@ -398,25 +389,26 @@ void printPage(Page p) {
 	for (int i = 0; i < p.keyCount + 1; i++) {
 		
 		if (p.child[i] != -1) {
-			printf("Child: %d\n", p.child[i]);
+			//printf("Child: %d\n", p.child[i]);
 		}
 		
 	}
+	printf("-------------------------------\n");
 	
 }
 
 /**Parses through tree to print elements**/
 void printTree(int RRN) {
 	
+	printf("Page Index: %d\n" , RRN);
 	Page p = readPageAt(RRN);
 	
 	printPage(p);
 	
 	for (int i = 0; i < p.keyCount + 1; i++) {
 		
-		if (p.child[i] != -1) {
-			p = readPageAt(p.child[i]);
-			printPage(p);
+		if (p.child[i] != -1) {//if node exists, print it.
+			printTree(p.child[i]);
 		}
 		
 	}
