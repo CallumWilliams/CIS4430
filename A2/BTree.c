@@ -190,8 +190,9 @@ Page readPageAt(int RRN) {
 	fd = open("index.txt", O_RDONLY);
 	
 	//collect string
-	pos = lseek(fd, INDEX_FILE_HEADER_LENGTH + (RRN * 512) + 1, 0);
+	pos = lseek(fd, INDEX_FILE_HEADER_LENGTH + (RRN * PAGE_SIZE) + 1, 0);
 	b = read(fd, buff, 512);
+	printf("%s\n", buff);
 	close(fd);
 	
 	//parse out page
@@ -244,12 +245,14 @@ Page readPageAt(int RRN) {
 		
 		//fetch record from data file
 		ret.key[i] = collectRecordAtIndex(key, atoi(ind));
+		ret.keyIndex[i] = atoi(ind);
 		indexTrack++;
 		
 	}
 	
+	//fetch children
 	tok = strtok(children, ",");
-	for (int i = 0; i < ret.keyCount + 1; i++) {
+	for (int i = 0; i < ORDER; i++) {
 		
 		ret.child[i] = atoi(tok);
 		tok = strtok(NULL, ",");
@@ -257,6 +260,58 @@ Page readPageAt(int RRN) {
 	}
 	
 	return ret;
+	
+}
+
+/**converts a page into a 512 byte string for the index file**/
+char *buildDataRecordString(Page p) {
+	
+	char *ret = malloc(sizeof(ret)*512);
+	int remaining;
+	
+	memset(ret, '\0', 512);
+	
+	//copy keyCount
+	sprintf(ret, "%d|", p.keyCount);
+	
+	//copy keys and indices
+	for (int i = 0; i < p.keyCount; i++) {
+		
+		sprintf(ret + strlen(ret), "%s %d", p.key[i].word, p.keyIndex[i]);
+		if (i + 1 != p.keyCount) strcat(ret, ",");
+		
+	}
+	strcat(ret, "|");
+	
+	//copy children
+	for (int i = 0; i < ORDER; i++) {
+		
+		sprintf(ret + strlen(ret), "%d", p.child[i]);
+		if (i + 1 != ORDER) strcat(ret, ", ");
+		
+	}
+	
+	//add remaining 512 bytes
+	remaining = PAGE_SIZE - strlen(ret);
+	for (int i = 0; i < remaining - 1; i++) {
+		sprintf(ret + strlen(ret), " ");
+	}
+	ret[PAGE_SIZE-1] = '|';
+	
+	return ret;
+	
+}
+
+/**writes converted string to the index file**/
+void writeDataToIndexFile(int loc, char *s) {
+	
+	int fd;
+	int pos;
+	
+	fd = open("index.txt", O_WRONLY);
+	pos = lseek(fd, INDEX_FILE_HEADER_LENGTH + (loc * PAGE_SIZE) + 1, 0);
+	write(fd, s, 512);
+	close(fd);
 	
 }
 
@@ -324,7 +379,7 @@ void displayOptions() {
 	printf("3) Display current B-Tree\n");
 	printf("4) Display header information\n");
 	printf("5) Exit\n");
-	printf(">");
+	printf("> ");
 	
 }
 
