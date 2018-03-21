@@ -1,6 +1,8 @@
 #define EXIT 5
 #define ORDER 4
 
+typedef enum {EXISTS, NOT_EXISTS} SearchResults;
+
 typedef struct _record {
 	
 	char *word;
@@ -43,4 +45,4 @@ void buildDataFileHeader(int flag, int recs);
 void buildIndexFileHeader(int headInd, int keyCount);
 char *buildDataRecordString(Page p);
 
-int searchRecord(int RRN, char *key);
+SearchResults searchRecord(int RRN, char *key);

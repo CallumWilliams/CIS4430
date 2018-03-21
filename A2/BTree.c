@@ -352,7 +352,7 @@ void buildIndexFileHeader(int headInd, int keyCount) {
 }
 
 /**searches for a record**/
-int searchRecord(int RRN, char *key) {
+SearchResults searchRecord(int RRN, char *key) {
 	
 	Page p = readPageAt(RRN);
 	
@@ -362,12 +362,12 @@ int searchRecord(int RRN, char *key) {
 		if (strcmp(p.key[i].word, key) == 0) {
 			printf("Found key %s\n", key);
 			printRecord(p.key[i]);
-			return 1;
+			return EXISTS;
 		}
 		
 	}
 	
-	return 0;
+	return NOT_EXISTS;
 	
 }
 
