@@ -1,10 +1,11 @@
 #include <stdio.h>
+#include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 
 #include "BTree.h"
-#include <stdio.h>
-#include <string.h>
+#include "parsing.h"
 
 int main() {
 	
