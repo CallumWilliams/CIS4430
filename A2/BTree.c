@@ -55,7 +55,6 @@ Record collectRecordAtIndex(char *key, int index) {
 	//fetch input string
 	read(fd, input, recLen);
 	strcat(input, "\0");
-	printf("Collected %s\n", input);
 	
 	//parse out arguments
 	tok = strtok(input, "|");
@@ -90,7 +89,6 @@ Page readPageAt(int RRN) {
 	//collect string
 	pos = lseek(fd, INDEX_FILE_HEADER_LENGTH + (RRN * PAGE_SIZE) + 1, 0);
 	b = read(fd, buff, 512);
-	printf("READ %s\n", buff);
 	close(fd);
 	
 	//parse out page
@@ -174,18 +172,65 @@ void writeDataToIndexFile(int loc, char *s) {
 	
 }
 
+/**checks to see if current node is a leaf node**/
+int isLeafNode(Page r) {
+	
+	for (int i = 0; i < ORDER; i++) {
+		if (r.child[i] != -1) {
+			return 0;//found a non-terminal branch. False.
+		}
+	}
+	
+	//all branches are terminal. True.
+	return 1;
+	
+}
+
 /**searches for a record**/
 SearchResults searchRecord(int RRN, char *key) {
 	
+	printf("RRN %d\n", RRN);
 	Page p = readPageAt(RRN);
 	
-	//find where the key should occur
+	if (isLeafNode(p) == 1) {
+		//last check. If it's not found here it doesn't exist.
+		for (int i = 0; i < ORDER - 1; i++) {
+			if (strcmp(key, p.key[i].word) == 0) {
+				printRecord(p.key[i]);
+				return EXISTS;
+			}
+		}
+		return NOT_EXISTS;
+	} else {
+		
+		//find which branch to go to
+		if (strcmp(key, p.key[0].word) < 0) {
+			//branch leftmost
+			return searchRecord(p.child[0], key);
+		} else if (strcmp(key, p.key[0].word) == 0) {
+			printRecord(p.key[0]);
+			return EXISTS;
+		}
+		//check other branches
+		for (int i = 1; i < p.keyCount; i++) {
+			if (strcmp(key, p.key[i].word) < 0) {
+				return searchRecord(p.child[i], key);
+			} else if (strcmp(key, p.key[i].word) == 0) {
+				printRecord(p.key[i]);
+				return EXISTS;
+			}
+		}
+		
+		//if nothing found in loop, branch rightmost
+		return searchRecord(p.child[p.keyCount], key);
+		
+	}
 	
 	return NOT_EXISTS;
 	
 }
 
-/**Displays list of available options**/
+/**displays list of available options**/
 void displayOptions() {
 	
 	printf("\n1) Insert a record\n");
@@ -197,7 +242,7 @@ void displayOptions() {
 	
 }
 
-/**Standard output for printing a record**/
+/**standard output for printing a record**/
 void printRecord(Record r) {
 	
 	printf("\tWord: %s\n", r.word);

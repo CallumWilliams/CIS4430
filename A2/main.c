@@ -28,10 +28,12 @@ int main() {
 					printf("Insert not yet supported\n");
 					break;
 				case 2:
-					printf("Enter the key you want to search for >");
+					printf("Enter the key you want to search for > ");
 					fgets(input, 20, stdin);
 					input[strlen(input)-1] = '\0';//removes \n
-					searchRecord(HEAD_PAGE_INDEX, input);
+					if (searchRecord(HEAD_PAGE_INDEX, input) == NOT_EXISTS) {
+						printf("Record %s not found\n", input);
+					}
 					break;
 				case 3:
 					printTree(HEAD_PAGE_INDEX);

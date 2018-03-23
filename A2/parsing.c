@@ -174,3 +174,18 @@ char *buildDataRecordString(Page p) {
 	return ret;
 	
 }
+
+/**add new record to end of data file**/
+void add_dataIndex(char *s) {
+	
+	int fd, pos;
+	
+	fd = open("data.txt", O_WRONLY);
+	
+	pos = lseek(fd, 0, SEEK_END);
+	printf("%d\n", pos);
+	write(fd, s, strlen(s) + 1);
+	close(fd);
+	
+	
+}
