@@ -11,12 +11,6 @@ typedef struct doc_term {
 	
 }DOC_TERM;
 
-typedef struct post_term {
-	
-	
-	
-}POST_TERM;
-
 typedef enum {DOC, TITLE, BODY} PARSE_STATE;
 
 void parseDocument(char *f);

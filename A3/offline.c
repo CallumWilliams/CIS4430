@@ -61,10 +61,28 @@ void parseDocument(char *f) {
 		} else if (s == TITLE) {
 			
 			printf("\tTITLE = %s\n", in_line);
+			//iterate through all the terms and add them to the tree
+			char *t = malloc(sizeof(char)*50);
+			t = strtok(in_line, " ");
+			do {
+				
+				if (t[strlen(t)-1] == '\n') t[strlen(t)-1] = '\0';
+				printf("TITLE|%s|\n", t);
+				
+			} while (t = strtok(NULL, " "));
 			
 		} else if (s == BODY) {
 			
 			printf("\tBODY = %s\n", in_line);
+			//iterate through all the terms and add them to the tree
+			char *t = malloc(sizeof(char)*50);
+			t = strtok(in_line, " ");
+			do {
+				
+				if (t[strlen(t)-1] == '\n') t[strlen(t)-1] = '\0';
+				printf("BODY|%s|\n", t);
+				
+			} while (t = strtok(NULL, " "));
 			
 		}
 		
@@ -90,7 +108,7 @@ int main(int argv, char *argc[]) {
 	avltree_init(&tree, cmp_fn, 0);
 	
 	if (argv != 2) {
-		printf("Run as ./offline <file-nam>\n");
+		printf("Run as ./offline <file-name>\n");
 		return 1;
 	}
 	parseDocument(argc[1]);
