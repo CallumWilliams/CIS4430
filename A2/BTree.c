@@ -189,33 +189,29 @@ int isLeafNode(Page r) {
 /**searches for a record**/
 SearchResults searchRecord(int RRN, char *key) {
 	
-	printf("RRN %d\n", RRN);
 	Page p = readPageAt(RRN);
 	
 	if (isLeafNode(p) == 1) {
+		
 		//last check. If it's not found here it doesn't exist.
 		for (int i = 0; i < ORDER - 1; i++) {
 			if (strcmp(key, p.key[i].word) == 0) {
+				//found record
 				printRecord(p.key[i]);
 				return EXISTS;
 			}
 		}
 		return NOT_EXISTS;
+		
 	} else {
 		
 		//find which branch to go to
-		if (strcmp(key, p.key[0].word) < 0) {
-			//branch leftmost
-			return searchRecord(p.child[0], key);
-		} else if (strcmp(key, p.key[0].word) == 0) {
-			printRecord(p.key[0]);
-			return EXISTS;
-		}
-		//check other branches
-		for (int i = 1; i < p.keyCount; i++) {
+		for (int i = 0; i < p.keyCount; i++) {
 			if (strcmp(key, p.key[i].word) < 0) {
+				//branch left from current pos
 				return searchRecord(p.child[i], key);
 			} else if (strcmp(key, p.key[i].word) == 0) {
+				//found record
 				printRecord(p.key[i]);
 				return EXISTS;
 			}
@@ -225,8 +221,6 @@ SearchResults searchRecord(int RRN, char *key) {
 		return searchRecord(p.child[p.keyCount], key);
 		
 	}
-	
-	return NOT_EXISTS;
 	
 }
 
