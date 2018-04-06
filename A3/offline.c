@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "avl/avl.h"
 #include "offline.h"
 
 /**Begin parsing input document**/
@@ -10,6 +11,9 @@ void parseDocument(char *f) {
 	char out_name[50];
 	char in_line[1000];
 	PARSE_STATE s = DOC;
+	
+	//stores all elements before adding to tree
+	struct term_list *terms = NULL;
 	
 	//setup input/output files
 	fp_in = fopen(f, "r");
@@ -67,7 +71,8 @@ void parseDocument(char *f) {
 			do {
 				
 				if (t[strlen(t)-1] == '\n') t[strlen(t)-1] = '\0';
-				printf("TITLE|%s|\n", t);
+				//find if term is already in list
+				
 				
 			} while (t = strtok(NULL, " "));
 			
@@ -87,30 +92,5 @@ void parseDocument(char *f) {
 		}
 		
 	}
-	
-}
-
-/**Prototype of comparison function**/
-int my_cmp(const struct avltree_node *a, const struct avltree_node *b) {
-	
-	DOC_TERM *p = avltree_container_of(a, DOC_TERM, node);
-	DOC_TERM *q = avltree_container_of(b, DOC_TERM, node);
-	
-	return strcmp(p->term_name, q->term_name);
-	
-}
-
-int main(int argv, char *argc[]) {
-	
-	struct avltree tree;
-	int cmp_fn;
-	
-	avltree_init(&tree, cmp_fn, 0);
-	
-	if (argv != 2) {
-		printf("Run as ./offline <file-name>\n");
-		return 1;
-	}
-	parseDocument(argc[1]);
 	
 }
