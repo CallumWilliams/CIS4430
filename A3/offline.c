@@ -10,6 +10,7 @@ void parseDocument(char *f) {
 	
 	char out_name[50];
 	char in_line[1000];
+	char id_tmp[100];
 	PARSE_STATE s = DOC;
 	
 	//stores all elements before adding to tree
@@ -42,7 +43,6 @@ void parseDocument(char *f) {
 		} else if (strcmp(in_line, "$TITLE\n") == 0) {
 			
 			s = TITLE;
-			printf("TITLE vs %s\n", in_line);
 			fgets(in_line, 1000, fp_in);
 			
 		} else if (strcmp(in_line, "$BODY\n") == 0) {
@@ -57,40 +57,91 @@ void parseDocument(char *f) {
 			//read out <docid>
 			char *id = strtok(NULL, " ");
 			id[strlen(id)-1] = '\0';
-			printf("DOC = |%s|\n", id);
-			
-			//swap states
-			getchar();
+			strcpy(id_tmp, id);
 			
 		} else if (s == TITLE) {
 			
-			printf("\tTITLE = %s\n", in_line);
 			//iterate through all the terms and add them to the tree
 			char *t = malloc(sizeof(char)*50);
 			t = strtok(in_line, " ");
+			
 			do {
 				
 				if (t[strlen(t)-1] == '\n') t[strlen(t)-1] = '\0';
-				//find if term is already in list
+				
+				struct term_list *curr_term;
+				
+				//check if term already exists in list
+				if (curr_term = term_list_contains(terms, t)) {
+					
+					if (freq_list_contains(curr_term->occur, id_tmp)) {
+						
+						//increment the frequency
+						incrementFrequency(curr_term->occur, id_tmp);
+						
+					} else {
+						
+						//add new frequency under current id
+						curr_term->occur = freq_list_add(curr_term->occur, id_tmp, 1);
+						
+					}
+					
+				} else {
+					
+					//create fully new term
+					struct freq_list *newFreq = NULL;
+					newFreq = freq_list_add(newFreq, id_tmp, 1);
+					terms = term_list_add(terms, t, newFreq);
+					
+				}
 				
 				
 			} while (t = strtok(NULL, " "));
+			free(t);
 			
 		} else if (s == BODY) {
 			
-			printf("\tBODY = %s\n", in_line);
 			//iterate through all the terms and add them to the tree
 			char *t = malloc(sizeof(char)*50);
 			t = strtok(in_line, " ");
+			
 			do {
 				
 				if (t[strlen(t)-1] == '\n') t[strlen(t)-1] = '\0';
-				printf("BODY|%s|\n", t);
+				
+				struct term_list *curr_term;
+				
+				//check if term already exists in list
+				if (curr_term = term_list_contains(terms, t)) {
+					
+					if (freq_list_contains(curr_term->occur, id_tmp)) {
+						
+						//increment the frequency
+						incrementFrequency(curr_term->occur, id_tmp);
+						
+					} else {
+						
+						//add new frequency under current id
+						curr_term->occur = freq_list_add(curr_term->occur, id_tmp, 1);
+						
+					}
+					
+				} else {
+					
+					//create fully new term
+					struct freq_list *newFreq = NULL;
+					newFreq = freq_list_add(newFreq, id_tmp, 1);
+					terms = term_list_add(terms, t, newFreq);
+					
+				}
 				
 			} while (t = strtok(NULL, " "));
-			
+			free(t);
 		}
 		
 	}
+	
+	//testing
+	printTerms(terms);
 	
 }
