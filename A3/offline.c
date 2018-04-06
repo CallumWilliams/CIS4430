@@ -13,6 +13,8 @@ void parseDocument(char *f) {
 	char id_tmp[100];
 	PARSE_STATE s = DOC;
 	
+	int term_count = 0;
+	
 	//stores all elements before adding to tree
 	struct term_list *terms = NULL;
 	
@@ -92,6 +94,7 @@ void parseDocument(char *f) {
 					struct freq_list *newFreq = NULL;
 					newFreq = freq_list_add(newFreq, id_tmp, 1);
 					terms = term_list_add(terms, t, newFreq);
+					term_count++;
 					
 				}
 				
@@ -141,7 +144,14 @@ void parseDocument(char *f) {
 		
 	}
 	
-	//testing
-	printTerms(terms);
+	//write to dictionary
+	fprintf(fp_dict, "%d\n", term_count);
+	while(terms) {
+		
+		//add to tree + file
+		fprintf(fp_dict, "%s %d\n", terms->term, terms->occur->doc_freq);
+		terms = terms->next;
+		
+	}
 	
 }
